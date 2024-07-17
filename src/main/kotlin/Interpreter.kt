@@ -7,8 +7,8 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
         return visit(ast)
     }
 
-    private fun extractNumbers(input: String): Int {
-        return Regex("\\d+").findAll(input).joinToString("") { it.value }.toInt()
+    private fun extractNumbers(input: String): List<Int> {
+        return Regex("\\d+").findAll(input).map { it -> it.value.toInt() }.toList()
     }
 
     private fun removeNumbers(input: String): String {
@@ -16,7 +16,16 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
     }
 
     private fun compareVersion(s1: String, s2: String): Int {
-        return extractNumbers(s1).compareTo(extractNumbers(s2))
+        val left = extractNumbers(s1)
+        val right = extractNumbers(s2)
+        val minSize = minOf(left.size, right.size)
+        for (i in 0 until minSize) {
+            if (left[i] > right[i]) return 1
+            if (left[i] < right[i]) return -1
+        }
+        if (left.size == right.size) return 0
+        else if (left.size > right.size) return 1
+        else return -1
     }
 
     private fun checkAndCompare(ast: BinOp, tokenType: TokenType): Boolean {
