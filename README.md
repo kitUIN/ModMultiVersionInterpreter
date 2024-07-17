@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kitUIN/ModMultiVersion/master/src/main/resources/META-INF/pluginIcon.svg" width="350" height="220" alt="ModMultiVersion"></a>
+  <img src="https://raw.githubusercontent.com/kitUIN/ModMultiVersionInterpreter/master/icon.svg" width="350" height="220" alt="ModMultiVersionInterpreter"></a>
 </p>
 <div align="center">
 
