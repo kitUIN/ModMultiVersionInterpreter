@@ -1,5 +1,5 @@
 ## ModMultiVersion解析器
-实现功能
+### 实现功能
 - `(` `)`
 - `!` `&&` `||`
 - `!=` `>` `>=` `<` `<=` `==`
@@ -9,3 +9,18 @@
 - 左部省略自动补充`$$ ==`
 - `$$`自动替换为具体内容
 - 支持使用其他 关键字用于自动替换
+### 使用
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        name = "kituinMavenReleases"
+        url = uri("https://maven.kituin.fun/releases")
+    }
+}
+
+dependencies {
+    implementation("io.github.kituin:ModMultiVersionInterpreter:$interpreter_version")
+}
+```
+
