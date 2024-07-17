@@ -23,9 +23,9 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
             if (left[i] > right[i]) return 1
             if (left[i] < right[i]) return -1
         }
-        if (left.size == right.size) return 0
-        else if (left.size > right.size) return 1
-        else return -1
+        return if (left.size == right.size) 0
+        else if (left.size > right.size) 1
+        else -1
     }
 
     private fun checkAndCompare(ast: BinOp, tokenType: TokenType): Boolean {
@@ -36,8 +36,9 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
             var rightRaw = ast.right.toString()
             if (rightRaw.startsWith("$") && goal.containsKey(rightRaw))
                 rightRaw = goal[rightRaw].toString()
-            val leftString = removeNumbers(leftRaw)
-            val rightString = removeNumbers(rightRaw)
+            val stringSize = minOf(leftRaw.length, rightRaw.length)
+            val leftString = removeNumbers(leftRaw.substring(0, stringSize))
+            val rightString = removeNumbers(rightRaw.substring(0, stringSize))
             if (leftString != rightString) return false
             val res = compareVersion(leftRaw, rightRaw)
             if (res > 0) {

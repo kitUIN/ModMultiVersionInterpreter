@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.kituin"
-version = "1.3.2"
+version = "1.3.4"
 
 repositories {
     mavenCentral()
