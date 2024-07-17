@@ -1,4 +1,4 @@
-package io.github.kituin
+package io.github.kituin.modmultiversioninterpreter
 
 
 class Interpreter(private val raw: String, private val goal: Map<String, String>) {

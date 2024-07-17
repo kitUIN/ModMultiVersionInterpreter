@@ -1,4 +1,4 @@
-package io.github.kituin
+package io.github.kituin.modmultiversioninterpreter
 
 
 class Lexer(private val text: String) {

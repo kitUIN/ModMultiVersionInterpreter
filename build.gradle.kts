@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.kituin"
-version = "1.0"
+version = "1.2.3"
 
 repositories {
     mavenCentral()
@@ -36,6 +36,7 @@ publishing {
             groupId = project.group.toString()
             version = project.version.toString()
 
+            from(components["java"])
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
 

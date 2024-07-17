@@ -1,4 +1,4 @@
-package io.github.kituin
+package io.github.kituin.modmultiversioninterpreter
 
 enum class TokenType(val value: String) {
     STRING("STRING"),
