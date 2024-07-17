@@ -20,14 +20,11 @@ class NotOp(val operand: AST) : AST() {
     }
 }
 
-class ASTString(private val token: Token, private val res: String = "") : AST() {
-    override fun toString(): String {
-        if (token.value == "$$") return res
-        return token.value
-    }
+class ASTString(private val token: Token) : AST() {
+    override fun toString() = token.value
 }
 
-class Parser(lexer: Lexer, private val res: String) {
+class Parser(lexer: Lexer) {
     private var index: Int = -1
     private val tokenList: List<Token> = lexer.getTokens()
     private var curToken = next()
@@ -76,7 +73,7 @@ class Parser(lexer: Lexer, private val res: String) {
         return when {
             TokenType.STRING == curToken.type -> {
                 eat(TokenType.STRING)
-                ASTString(tmpToken, res)
+                ASTString(tmpToken)
             }
 
             TokenType.LBRACKETS == curToken.type -> {

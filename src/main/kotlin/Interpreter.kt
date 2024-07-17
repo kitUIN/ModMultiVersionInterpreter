@@ -1,9 +1,9 @@
 package io.github.kituin
 
 
-class Interpreter(private val raw: String, private val goal: String) {
+class Interpreter(private val raw: String, private val goal: Map<String, String>) {
     fun interpret(): Boolean {
-        val ast = Parser(Lexer(raw), goal).parse()
+        val ast = Parser(Lexer(raw)).parse()
         return visit(ast)
     }
 
@@ -21,18 +21,31 @@ class Interpreter(private val raw: String, private val goal: String) {
 
     private fun checkAndCompare(ast: BinOp, tokenType: TokenType): Boolean {
         if ((ast.left is ASTString && ast.right is ASTString)) {
-            val leftRaw = ast.left.toString()
-            val rightRaw = ast.right.toString()
+            var leftRaw = ast.left.toString()
+            if (leftRaw.startsWith("$") && goal.containsKey(leftRaw))
+                leftRaw = goal[leftRaw].toString()
+            var rightRaw = ast.right.toString()
+            if (rightRaw.startsWith("$") && goal.containsKey(rightRaw))
+                rightRaw = goal[rightRaw].toString()
             val leftString = removeNumbers(leftRaw)
             val rightString = removeNumbers(rightRaw)
             if (leftString != rightString) return false
             val res = compareVersion(leftRaw, rightRaw)
             if (res > 0) {
-                if (tokenType == TokenType.GREATER || tokenType == TokenType.GREATER_EQUAL || tokenType == TokenType.NOT_EQUAL) return true
+                if (tokenType == TokenType.GREATER ||
+                    tokenType == TokenType.GREATER_EQUAL ||
+                    tokenType == TokenType.NOT_EQUAL
+                ) return true
             } else if (res < 0) {
-                if (tokenType == TokenType.LESS || tokenType == TokenType.LESS_EQUAL || tokenType == TokenType.NOT_EQUAL) return true
+                if (tokenType == TokenType.LESS ||
+                    tokenType == TokenType.LESS_EQUAL ||
+                    tokenType == TokenType.NOT_EQUAL
+                ) return true
             } else {
-                if (tokenType == TokenType.EQUAL || tokenType == TokenType.LESS_EQUAL || tokenType == TokenType.GREATER_EQUAL) return true
+                if (tokenType == TokenType.EQUAL ||
+                    tokenType == TokenType.LESS_EQUAL ||
+                    tokenType == TokenType.GREATER_EQUAL
+                ) return true
             }
             return false
         }
@@ -50,6 +63,7 @@ class Interpreter(private val raw: String, private val goal: String) {
                     TokenType.AND -> {
                         visit(ast.left) && visit(ast.right)
                     }
+
                     else -> {
                         checkAndCompare(ast, ast.op.type)
                     }
