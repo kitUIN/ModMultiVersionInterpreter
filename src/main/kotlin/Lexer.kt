@@ -113,7 +113,7 @@ class Lexer(private val text: String) {
     }
 
     private fun advance() {
-        nextChar = text.getOrNull(nextPos++)
+        nextChar = text.getOrNull(++nextPos)
     }
 
     override fun toString(): String {

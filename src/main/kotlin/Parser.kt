@@ -30,7 +30,7 @@ class Parser(lexer: Lexer) {
     private var curToken = next()
     fun parse(): AST = exp()
     private fun next(): Token {
-        return tokenList.getOrNull(index++) ?: Token(TokenType.EOF, TokenType.EOF.value)
+        return tokenList.getOrNull(++index) ?: Token(TokenType.EOF, TokenType.EOF.value)
     }
 
     private fun eat(tokenType: TokenType) {
