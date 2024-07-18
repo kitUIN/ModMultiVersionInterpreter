@@ -8,7 +8,7 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
     }
 
     private fun extractNumbers(input: String): List<Int> {
-        return Regex("\\d+").findAll(input).map { it -> it.value.toInt() }.toList()
+        return Regex("\\d+").findAll(input).map { it.value.toInt() }.toList()
     }
 
     private fun removeNumbers(input: String): String {
@@ -29,48 +29,41 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
     }
 
     private fun checkAndCompare(ast: BinOp, tokenType: TokenType): Boolean {
-        if ((ast.left is ASTString && ast.right is ASTString)) {
-            var leftRaw = ast.left.toString()
-            if (leftRaw.startsWith("$") && goal.containsKey(leftRaw))
-                leftRaw = goal[leftRaw].toString()
-            var rightRaw = ast.right.toString()
-            if (rightRaw.startsWith("$") && goal.containsKey(rightRaw))
-                rightRaw = goal[rightRaw].toString()
-            val stringSize = minOf(leftRaw.length, rightRaw.length)
-            val leftString = removeNumbers(leftRaw.substring(0, stringSize))
-            val rightString = removeNumbers(rightRaw.substring(0, stringSize))
-            if (leftString != rightString) return false
-            val res = compareVersion(leftRaw, rightRaw)
-            if (res > 0) {
-                if (tokenType == TokenType.GREATER ||
-                    tokenType == TokenType.GREATER_EQUAL ||
-                    tokenType == TokenType.NOT_EQUAL
-                ) return true
-            } else if (res < 0) {
-                if (tokenType == TokenType.LESS ||
-                    tokenType == TokenType.LESS_EQUAL ||
-                    tokenType == TokenType.NOT_EQUAL
-                ) return true
-            } else {
-                if (tokenType == TokenType.EQUAL ||
-                    tokenType == TokenType.LESS_EQUAL ||
-                    tokenType == TokenType.GREATER_EQUAL
-                ) return true
-            }
-            return false
-        }
+    if (ast.left !is ASTString || ast.right !is ASTString) {
         throw RuntimeException("error ast, $ast: both sides must be strings")
     }
+
+    val leftRaw = resolveVariable(ast.left.toString())
+    val rightRaw = resolveVariable(ast.right.toString())
+
+    if (!haveSameNonNumericPrefix(leftRaw, rightRaw)) return false
+
+    return when {
+        compareVersion(leftRaw, rightRaw) > 0 -> tokenType in setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.NOT_EQUAL)
+        compareVersion(leftRaw, rightRaw) < 0 -> tokenType in setOf(TokenType.LESS, TokenType.LESS_EQUAL, TokenType.NOT_EQUAL)
+        else -> tokenType in setOf(TokenType.EQUAL, TokenType.ALSO_EQUAL, TokenType.LESS_EQUAL, TokenType.GREATER_EQUAL)
+    }
+}
+
+private fun resolveVariable(value: String): String =
+    if (value.startsWith("$") && goal.containsKey(value)) goal[value].toString() else value
+
+private fun haveSameNonNumericPrefix(s1: String, s2: String): Boolean {
+    val minLength = minOf(s1.length, s2.length)
+    val prefix1 = removeNumbers(s1.substring(0, minLength))
+    val prefix2 = removeNumbers(s2.substring(0, minLength))
+    return prefix1 == prefix2
+}
 
     private fun visit(ast: AST): Boolean {
         when (ast) {
             is BinOp -> {
                 return when (ast.op.type) {
-                    TokenType.OR -> {
+                    TokenType.OR, TokenType.OR_ALSO -> {
                         visit(ast.left) || visit(ast.right)
                     }
 
-                    TokenType.AND -> {
+                    TokenType.AND, TokenType.AND_ALSO -> {
                         visit(ast.left) && visit(ast.right)
                     }
 

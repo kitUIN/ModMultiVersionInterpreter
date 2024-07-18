@@ -43,13 +43,12 @@ class Parser(lexer: Lexer) {
 
     private fun exp(): AST {
         var node = term()
-        while (TokenType.AND == curToken.type || TokenType.OR == curToken.type) {
+        while (TokenType.AND == curToken.type ||
+            TokenType.AND_ALSO == curToken.type ||
+            TokenType.OR == curToken.type ||
+            TokenType.OR_ALSO == curToken.type) {
             val tmpToken = curToken
-            if (TokenType.AND == curToken.type) {
-                eat(TokenType.AND)
-            } else {
-                eat(TokenType.OR)
-            }
+            eat(tmpToken.type)
             node = BinOp(node, tmpToken, term())
         }
         return node
@@ -57,7 +56,9 @@ class Parser(lexer: Lexer) {
 
     fun term(): AST {
         var node: AST = factor()
-        while (TokenType.EQUAL == curToken.type || TokenType.NOT_EQUAL == curToken.type ||
+        while (TokenType.EQUAL == curToken.type ||
+            TokenType.ALSO_EQUAL == curToken.type ||
+            TokenType.NOT_EQUAL == curToken.type ||
             TokenType.LESS == curToken.type || TokenType.GREATER == curToken.type ||
             TokenType.LESS_EQUAL == curToken.type || TokenType.GREATER_EQUAL == curToken.type
         ) {

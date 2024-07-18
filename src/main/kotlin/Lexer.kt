@@ -21,9 +21,6 @@ class Lexer(private val text: String) {
     private fun createToken(char: String): Token? {
         val tokenType = tokenMap[char] ?: return null
         val pos = nextPos - 1
-        if (tokenType == TokenType.ALSO_EQUAL) {
-            return Token(TokenType.EQUAL, TokenType.EQUAL.value, pos)
-        }
         return Token(tokenType, tokenType.value, pos)
     }
 
@@ -45,7 +42,7 @@ class Lexer(private val text: String) {
         val oldChar = nextChar
         advance()
         val eq = nextChar == oldChar
-        val token = createToken(oldChar.toString())
+        val token = createToken(if (eq) "$oldChar$oldChar" else oldChar.toString())
         if (token != null) {
             if (eq) advance()
             tokenList.add(token)
@@ -105,6 +102,8 @@ class Lexer(private val text: String) {
         if (currentToken != null && currentToken.value == "$$") return false
         return beforeToken.type == TokenType.OR ||
                 beforeToken.type == TokenType.AND ||
+                beforeToken.type == TokenType.OR_ALSO ||
+                beforeToken.type == TokenType.AND_ALSO ||
                 beforeToken.type == TokenType.LBRACKETS ||
                 beforeToken.type == TokenType.RBRACKETS
     }
