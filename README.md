@@ -49,6 +49,6 @@ dependencies {
 val interpreter = Interpreter(">=fabric-1.20", mutableMapOf(
             "$$" to "fabric-1.20.3"
         ))
-println(interpreter.interpret())
+println(interpreter.interpret()) // true
 ```
 

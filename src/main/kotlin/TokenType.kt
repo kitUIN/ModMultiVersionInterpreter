@@ -12,3 +12,11 @@ enum class TokenType(val value: String) {
     LBRACKETS("("), RBRACKETS(")"),
     EOF("EOF")
 }
+
+enum class TokenBelong{
+    VARIANT,
+    OPERATOR,
+    STRING,
+    BRACKETS,
+    EOF
+}

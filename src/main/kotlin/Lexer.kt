@@ -20,10 +20,11 @@ class Lexer(private val text: String) {
 
     private fun createToken(char: String): Token? {
         val tokenType = tokenMap[char] ?: return null
+        val pos = nextPos - 1
         if (tokenType == TokenType.ALSO_EQUAL) {
-            return Token(TokenType.EQUAL, TokenType.EQUAL.value)
+            return Token(TokenType.EQUAL, TokenType.EQUAL.value, pos)
         }
-        return Token(tokenType, tokenType.value)
+        return Token(tokenType, tokenType.value, pos)
     }
 
     private fun checkNextEqual(): Boolean {
@@ -55,27 +56,30 @@ class Lexer(private val text: String) {
 
     fun getTokens(): List<Token> {
         while (nextChar != null) {
-            if (nextChar == ' ') {
-                skipWhiteSpace()
-            } else if (tokenMap.containsKey(nextChar.toString())) {
-                if (nextChar == '>' || nextChar == '<' || nextChar == '=' || nextChar == '!') {
-                    checkNextEqual()
-                } else if (nextChar == '|' || nextChar == '&') {
-                    checkNextAlso()
-                } else {
-                    val token = createToken(nextChar.toString())
-                    if (token != null) {
-                        advance()
-                        tokenList.add(token)
-                    }
+            when {
+                nextChar == ' ' -> skipWhiteSpace()
+                tokenMap.containsKey(nextChar.toString()) -> processToken()
+                else -> {
+                    val pos = nextPos
+                    tokenList.add(Token(TokenType.STRING, getString(), pos))
+                    checkBeforeAndAutoAdd(isString = true)
                 }
-            } else {
-                tokenList.add(Token(TokenType.STRING, getString()))
-                checkBeforeAndAutoAdd(isString = true)
             }
-
         }
         return tokenList
+    }
+
+    private fun processToken() {
+        when (nextChar) {
+            '>', '<', '=', '!' -> checkNextEqual()
+            '|', '&' -> checkNextAlso()
+            else -> {
+                createToken(nextChar.toString())?.let {
+                    advance()
+                    tokenList.add(it)
+                }
+            }
+        }
     }
 
     private fun getString(): String {
@@ -107,8 +111,8 @@ class Lexer(private val text: String) {
 
     private fun checkBeforeAndAutoAdd(isString: Boolean = false) {
         if (checkBefore()) {
-            tokenList.add(tokenList.lastIndex, Token(TokenType.STRING, "$$"))
-            if (isString) tokenList.add(tokenList.lastIndex, Token(TokenType.EQUAL, TokenType.EQUAL.value))
+            tokenList.add(tokenList.lastIndex, Token(TokenType.STRING, "$$", -1))
+            if (isString) tokenList.add(tokenList.lastIndex, Token(TokenType.EQUAL, TokenType.EQUAL.value, -1))
         }
     }
 

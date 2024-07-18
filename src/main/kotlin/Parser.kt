@@ -30,14 +30,14 @@ class Parser(lexer: Lexer) {
     private var curToken = next()
     fun parse(): AST = exp()
     private fun next(): Token {
-        return tokenList.getOrNull(++index) ?: Token(TokenType.EOF, TokenType.EOF.value)
+        return tokenList.getOrNull(++index) ?: Token(TokenType.EOF, TokenType.EOF.value, -1)
     }
 
     private fun eat(tokenType: TokenType) {
         if (tokenType == curToken.type) {
             curToken = next()
         } else {
-            throw RuntimeException("TokenType是${tokenType.value}语法格式错误")
+            throw ParseException("${curToken.value}:grammatical formatting error [position: ${curToken.startPos}]", curToken)
         }
     }
 
@@ -89,7 +89,7 @@ class Parser(lexer: Lexer) {
             }
 
             else -> {
-                throw RuntimeException("TokenType是${curToken.value}语法格式错误")
+                throw ParseException("${curToken.value}:grammatical formatting error [position: ${curToken.startPos}]", curToken)
             }
         }
     }
