@@ -26,7 +26,7 @@ class ASTString(private val token: Token) : AST() {
 
 class Parser(lexer: Lexer) {
     private var index: Int = -1
-    private val tokenList: List<Token> = lexer.getTokens()
+    val tokenList: List<Token> = lexer.getTokens()
     private var curToken = next()
     fun parse(): AST = exp()
     private fun next(): Token {
