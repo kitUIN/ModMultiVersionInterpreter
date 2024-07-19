@@ -97,9 +97,9 @@ class Lexer(private val text: String) {
     }
 
     private fun checkBefore(): Boolean {
-        val beforeToken = tokenList.getOrNull(tokenList.lastIndex - 1) ?: return true
         val currentToken = tokenList.getOrNull(tokenList.lastIndex)
         if (currentToken != null && currentToken.value == "$$") return false
+        val beforeToken = tokenList.getOrNull(tokenList.lastIndex - 1) ?: return true
         return beforeToken.type == TokenType.OR ||
                 beforeToken.type == TokenType.AND ||
                 beforeToken.type == TokenType.OR_ALSO ||

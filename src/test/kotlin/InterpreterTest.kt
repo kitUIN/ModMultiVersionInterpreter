@@ -19,4 +19,11 @@ class InterpreterTest {
         ))
         assertTrue(interpreter.interpret())
     }
+    @Test
+    fun run3() {
+        val interpreter = Interpreter("$$ == fabric-1.16.5", mutableMapOf(
+            "$$" to "fabric-1.16.5"
+        ))
+        assertTrue(interpreter.interpret())
+    }
 }
