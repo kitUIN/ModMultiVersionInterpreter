@@ -17,7 +17,7 @@ class LexerTest {
     }
     @Test
     fun run3() {
-        val lex = Lexer(">= fabric-1.16.5 || fabric-1.17.1")
+        val lex = Lexer(">= fabric-1.16.5 | fabric-1.17.1")
         println(lex.getTokens())
         assertEquals("$$ >= fabric-1.16.5 | $$ == fabric-1.17.1", lex.toString())
     }
