@@ -1,0 +1,38 @@
+name: Package
+
+on:
+  push:
+    tags:
+      - "*.*" # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Get version
+        shell: pwsh
+        run: |
+          echo "${{ github.ref_name }}"
+      - name: Chose JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build
+        run: |
+          ./gradlew clean build
+      - name: Publish
+        run: |
+          ./gradlew publish -Puser=${{ secrets.KITUIN_USERNAME }} -Ppwd=${{ secrets.KITUIN_PASSWORD }}
+
+      - name: Create GitHub release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          # automatic_release_tag: ${{ github.ref_name }}
+          title: ${{ github.ref_name }}
+          prerelease: false
+          files: |
+            build/libs/*

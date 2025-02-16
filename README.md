@@ -27,7 +27,7 @@
 - 左部省略自动补充`$$ ==`
 - `$$`自动替换为具体内容
 - 支持使用其他 关键字用于自动替换
-
+- 支持`*-1.20.1`通配符识别加载器
 
 ## 使用
 ```kotlin
@@ -52,3 +52,8 @@ val interpreter = Interpreter(">=fabric-1.20", mutableMapOf(
 println(interpreter.interpret()) // true
 ```
 
+
+## 相关项目
+- [ModMultiVersion](https://github.com/kitUIN/ModMultiVersion) Idea插件-Minecraft模组多版本代码同步
+- [ModMultiVersionTool](https://github.com/kitUIN/ModMultiVersionTool) ModMultiVersion-构建工具
+- [ModMultiVersionInterpreter](https://github.com/kitUIN/ModMultiVersionInterpreter) ModMultiVersion自定义词法分析器,语法分析器,解释执行器
