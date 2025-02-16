@@ -1,5 +1,15 @@
 package io.github.kituin.modmultiversioninterpreter
 
+/**
+ * 原始划分
+ *
+ * fabric-1.16.5 划分为 fabric 与 1.16.5
+ */
+class SplitRaw(
+    val prefix: String,
+    val version: String
+)
+
 
 class Interpreter(private val raw: String, private val goal: Map<String, String>) {
     fun interpret(): Boolean {
@@ -9,10 +19,6 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
 
     private fun extractNumbers(input: String): List<Int> {
         return Regex("\\d+").findAll(input).map { it.value.toInt() }.toList()
-    }
-
-    private fun removeNumbers(input: String): String {
-        return input.replace(Regex("\\d+"), "")
     }
 
     private fun compareVersion(s1: String, s2: String): Int {
@@ -29,31 +35,63 @@ class Interpreter(private val raw: String, private val goal: Map<String, String>
     }
 
     private fun checkAndCompare(ast: BinOp, tokenType: TokenType): Boolean {
-    if (ast.left !is ASTString || ast.right !is ASTString) {
-        throw RuntimeException("error ast, $ast: both sides must be strings")
+        if (ast.left !is ASTString || ast.right !is ASTString) {
+            throw RuntimeException("error ast, $ast: both sides must be strings")
+        }
+
+        val leftRaw = splitPrefixAndVersion(resolveVariable(ast.left.toString()))
+        val rightRaw = splitPrefixAndVersion(resolveVariable(ast.right.toString()))
+
+        if (!haveSamePrefix(leftRaw.prefix, rightRaw.prefix)) return false
+
+        return when {
+            compareVersion(leftRaw.version, rightRaw.version) > 0 -> tokenType in setOf(
+                TokenType.GREATER,
+                TokenType.GREATER_EQUAL,
+                TokenType.NOT_EQUAL
+            )
+
+            compareVersion(leftRaw.version, rightRaw.version) < 0 -> tokenType in setOf(
+                TokenType.LESS,
+                TokenType.LESS_EQUAL,
+                TokenType.NOT_EQUAL
+            )
+
+            else -> tokenType in setOf(
+                TokenType.EQUAL,
+                TokenType.ALSO_EQUAL,
+                TokenType.LESS_EQUAL,
+                TokenType.GREATER_EQUAL
+            )
+        }
     }
 
-    val leftRaw = resolveVariable(ast.left.toString())
-    val rightRaw = resolveVariable(ast.right.toString())
+    /**
+     * 移除自动变量$
+     */
+    private fun resolveVariable(value: String): String =
+        if (value.startsWith("$") && goal.containsKey(value)) goal[value].toString() else value
 
-    if (!haveSameNonNumericPrefix(leftRaw, rightRaw)) return false
-
-    return when {
-        compareVersion(leftRaw, rightRaw) > 0 -> tokenType in setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.NOT_EQUAL)
-        compareVersion(leftRaw, rightRaw) < 0 -> tokenType in setOf(TokenType.LESS, TokenType.LESS_EQUAL, TokenType.NOT_EQUAL)
-        else -> tokenType in setOf(TokenType.EQUAL, TokenType.ALSO_EQUAL, TokenType.LESS_EQUAL, TokenType.GREATER_EQUAL)
+    /**
+     * 划分前缀和版本号
+     */
+    private fun splitPrefixAndVersion(value: String): SplitRaw {
+        val sp = value.split("-", limit = 2)
+        if (sp.size == 2) {
+            return SplitRaw(sp[0], sp[1])
+        } else if (sp.size == 1) {
+            return SplitRaw(sp[0], "")
+        }
+        return SplitRaw("", "")
     }
-}
 
-private fun resolveVariable(value: String): String =
-    if (value.startsWith("$") && goal.containsKey(value)) goal[value].toString() else value
-
-private fun haveSameNonNumericPrefix(s1: String, s2: String): Boolean {
-    val minLength = minOf(s1.length, s2.length)
-    val prefix1 = removeNumbers(s1.substring(0, minLength))
-    val prefix2 = removeNumbers(s2.substring(0, minLength))
-    return prefix1 == prefix2
-}
+    /**
+     * 检查相同前缀，支持通配符*
+     */
+    private fun haveSamePrefix(prefix1: String, prefix2: String): Boolean {
+        if (prefix2 == "*") return true
+        return prefix1 == prefix2
+    }
 
     private fun visit(ast: AST): Boolean {
         when (ast) {
